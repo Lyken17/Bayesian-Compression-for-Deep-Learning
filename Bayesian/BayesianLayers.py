@@ -3,8 +3,6 @@
 
 """
 Variational Dropout version of linear and convolutional layers
-
-
 Karen Ullrich, Christos Louizos, Oct 2017
 """
 
@@ -414,8 +412,8 @@ class Conv2dGroupNJ(_ConvNdGroupNJ):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
+               + str(self.in_channels) + ' -> ' \
+               + str(self.out_channels) + ')'
 
 
 class Conv3dGroupNJ(_ConvNdGroupNJ):
@@ -457,12 +455,13 @@ class Conv3dGroupNJ(_ConvNdGroupNJ):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
+               + str(self.in_channels) + ' -> ' \
+               + str(self.out_channels) + ')'
 
 
 if __name__ == "__main__":
-    conv = Conv3dGroupNJ(3, 12, 3, stride=1, padding=0, dilation=1, groups=1, bias=True,
+    conv = Conv2dGroupNJ(3, 12, 3, stride=1, padding=1, dilation=1, groups=1, bias=True,
                          cuda=False, init_weight=None, init_bias=None, clip_var=None)
-
-    print(conv)
+    data = torch.Tensor(3, 3, 28, 28)
+    data = Variable(data)
+    print(conv(data).size())
