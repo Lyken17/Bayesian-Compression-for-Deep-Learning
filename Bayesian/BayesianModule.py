@@ -19,7 +19,7 @@ class BayesianModule(nn.Module):
     def __setattr__(self, name, value):
         super(BayesianModule, self).__setattr__(name, value)
         # simple hack to collect bayesian layer automatically
-        if isinstance(value, BayesianLayers.BayesianLayers):
+        if isinstance(value, BayesianLayers.BayesianLayers) and not isinstance(value, BayesianLayers._ConvNdGroupNJ):
             self.kl_list.append(value)
             self.layers.append(value)
 
@@ -64,7 +64,7 @@ class MLP_Cifar(BayesianModule):
         x = x.view(-1, 3 * 32 * 32)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.fc3(x)
+        x = self.fc3(x)
         return x
 
 
@@ -88,8 +88,8 @@ class LeNet_Cifar(BayesianModule):
     def __init__(self, num_classes=10, use_cuda=True):
         super(LeNet_Cifar, self).__init__()
 
-        self.conv1 = BayesianLayers.Conv2dGroupNJ(3, 6, 5)
-        self.conv2 = BayesianLayers.Conv2dGroupNJ(6, 16, 5)
+        self.conv1 = BayesianLayers.Conv2dGroupNJ(3, 6, 5, cuda=use_cuda)
+        self.conv2 = BayesianLayers.Conv2dGroupNJ(6, 16, 5, cuda=use_cuda)
 
         self.fc1 = BayesianLayers.LinearGroupNJ(16 * 5 * 5, 120, clip_var=0.04, cuda=use_cuda)
         self.fc2 = BayesianLayers.LinearGroupNJ(120, 84, cuda=use_cuda)
@@ -105,6 +105,28 @@ class LeNet_Cifar(BayesianModule):
         out = F.relu(self.fc2(out))
         out = self.fc3(out)
         return out
+
+
+class LeNet_MNIST(BayesianModule):
+    def __init__(self, num_classes=10, use_cuda=True):
+        super(LeNet_MNIST, self).__init__()
+
+        self.conv1 = BayesianLayers.Conv2dGroupNJ(1, 10, 5, cuda=use_cuda)
+        self.conv2 = BayesianLayers.Conv2dGroupNJ(10, 20, 5, cuda=use_cuda)
+
+        self.fc1 = BayesianLayers.LinearGroupNJ(320, 50, clip_var=0.04, cuda=use_cuda)
+        self.fc2 = BayesianLayers.LinearGroupNJ(50, num_classes, cuda=use_cuda)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        out = x.view(x.size(0), -1)
+        out = F.relu(self.fc1(out))
+        out = self.fc2(out)
+        return out
+
 
 if __name__ == "__main__":
     net = LeNet_Cifar(use_cuda=False)

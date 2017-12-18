@@ -152,6 +152,13 @@ class LinearGroupNJ(BayesianLayers):
         weight_var, z_var = self.weight_logvar.exp(), self.z_logvar.exp()
         self.post_weight_var = self.z_mu.pow(2) * weight_var + z_var * self.weight_mu.pow(2) + z_var * weight_var
         self.post_weight_mu = self.weight_mu * self.z_mu
+        # print("self.z_mu.pow(2): ", self.z_mu.pow(2).size())
+        # print("weight_var: ", weight_var.size())
+        # print("z_var: ", z_var.size())
+        # print("self.weight_mu.pow(2): ", self.weight_mu.pow(2).size())
+        # print("weight_var: ", weight_var.size())
+        # print("post_weight_mu: ", self.post_weight_mu.size())
+        # print("post_weight_var: ", self.post_weight_var.size())
         return self.post_weight_mu, self.post_weight_var
 
     def forward(self, x):
@@ -293,8 +300,18 @@ class _ConvNdGroupNJ(BayesianLayers):
 
     def compute_posterior_params(self):
         weight_var, z_var = self.weight_logvar.exp(), self.z_logvar.exp()
-        self.post_weight_var = self.z_mu.pow(2) * weight_var + z_var * self.weight_mu.pow(2) + z_var * weight_var
+        print("self.z_mu.pow(2): ", self.z_mu.pow(2).size())
+        print("weight_var: ", weight_var.size())
+        print("z_var: ", z_var.size())
+        print("self.weight_mu.pow(2): ", self.weight_mu.pow(2).size())
+        print("weight_var: ", weight_var.size())
+        part1 = self.z_mu.pow(2) * weight_var
+        part2 = z_var * self.weight_mu.pow(2)
+        part3 = z_var * weight_var
+        self.post_weight_var = part1 + part2 + part3
         self.post_weight_mu = self.weight_mu * self.z_mu
+        print("post_weight_mu: ", self.post_weight_mu.size())
+        print("post_weight_var: ", self.post_weight_var.size())
         return self.post_weight_mu, self.post_weight_var
 
     def kl_divergence(self):
