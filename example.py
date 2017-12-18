@@ -1,14 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-Linear Bayesian Model
-
-
-Karen Ullrich, Christos Louizos, Oct 2017
-"""
-
-# libraries
 from __future__ import print_function
 
 import torch
